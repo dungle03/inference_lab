@@ -65,7 +65,11 @@ def build_rpg_graph(rules: Sequence[Rule]) -> nx.DiGraph:
     return graph
 
 
-def _apply_fact_style(dot: "Digraph", node: str, role: str | None) -> None:
+def _apply_fact_style(
+    dot: "Digraph | None", node: str, role: str | None
+) -> None:
+    if dot is None:
+        return
     base_attrs = {
         "shape": "circle",
         "width": "0.65",
@@ -100,7 +104,9 @@ def _apply_fact_style(dot: "Digraph", node: str, role: str | None) -> None:
         )
 
 
-def _apply_rule_style(dot: "Digraph", node: str) -> None:
+def _apply_rule_style(dot: "Digraph | None", node: str) -> None:
+    if dot is None:
+        return
     dot.node(
         node,
         node,
