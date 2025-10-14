@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <title>Inference Lab – Suy diễn tiến & lùi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --bg: #f7f8fa;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --accent: #2563eb;
+            --accent-soft: #dbeafe;
+            --text: #1f2937;
+            --muted: #64748b;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero {
+            padding: 48px 24px 72px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 40%, #4f46e5 100%);
+            color: #f8fafc;
+        }
+
+        .hero-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: clamp(2.1rem, 4vw, 2.6rem);
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            margin: 0;
+            max-width: 720px;
+            line-height: 1.6;
+            color: rgba(248, 250, 252, 0.9);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: none;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.25s ease, opacity 0.15s ease;
+        }
+
+        .btn-primary {
+            background: #facc15;
+            color: #1f2937;
+            box-shadow: 0 14px 26px rgba(250, 204, 21, 0.28);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(250, 204, 21, 0.36);
+        }
+
+        .btn-secondary {
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.9;
+        }
+
+        .workspace {
+            max-width: 1320px;
+            margin: -40px auto 40px;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 1.05fr 0.8fr 1fr;
+            grid-template-areas: "input result graphs";
+            gap: 24px;
+            align-items: start;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .panel h2 {
+            margin: 0;
+            font-size: 1.35rem;
+        }
+
+        .panel p {
+            margin-top: 6px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .panel-divider {
+            width: 100%;
+            height: 1px;
+            background: rgba(148, 163, 184, 0.25);
+            margin: 20px 0;
+        }
+
+        .panel-input {
+            grid-area: input;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .panel-result {
+            grid-area: result;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+                .panel-result {
+            grid-area: result;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .panel-graphs {
+            grid-area: graphs;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .field-block {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .field-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .field-header h3 {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .field-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--accent);
+            border: 1px dashed rgba(37, 99, 235, 0.35);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            background: rgba(37, 99, 235, 0.08);
+        }
+
+        .rule-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .rule-item {
+            display: grid;
+            grid-template-columns: minmax(48px, max-content) 1fr max-content;
+            gap: 10px;
+            align-items: center;
+            background: rgba(37, 99, 235, 0.06);
+            border-radius: 12px;
+            padding: 10px 12px;
+        }
+
+        .rule-label {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .rule-input {
+            width: 100%;
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .rule-input:focus {
+            outline: 2px solid rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .btn-icon:hover {
+            background: rgba(15, 23, 42, 0.08);
+            color: var(--danger);
+        }
+
+        .textfield,
+        .textarea {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            padding: 12px 14px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        .options-block {
+            gap: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 14px;
+            padding: 16px 18px;
+            background: rgba(148, 163, 184, 0.07);
+        }
+
+        .mode-switch {
+            display: inline-flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .mode-switch label {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            cursor: pointer;
+            background: #ffffff;
+        }
+
+        .mode-switch input[type="radio"] {
+            accent-color: var(--accent);
+        }
+
+        .option-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 16px;
+            align-items: center;
+        }
+
+        .option-group span {
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .option-buttons {
+            display: inline-flex;
+            gap: 10px;
+        }
+
+        .option-buttons label {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(15, 23, 42, 0.2);
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .option-buttons input[type="radio"] {
+            accent-color: var(--accent);
+        }
+
+        .panel-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-run {
+            background: var(--accent);
+            color: #fff;
+            min-width: 180px;
+        }
+
+        .btn-run:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .btn-clear {
+            background: rgba(15, 23, 42, 0.08);
+            color: var(--muted);
+        }
+
+        .status {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: rgba(22, 163, 74, 0.12);
+            color: var(--success);
+        }
+
+        .status-failure {
+            background: rgba(220, 38, 38, 0.12);
+            color: var(--danger);
+        }
+
+        .status-warn {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--warning);
+        }
+
+        .status-info {
+            background: rgba(37, 99, 235, 0.12);
+            color: var(--accent);
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.08);
+            font-size: 0.85rem;
+        }
+
+        .badge-goal {
+            background: rgba(37, 99, 235, 0.15);
+            color: var(--accent);
+        }
+
+        .badge-fact {
+            background: rgba(22, 163, 74, 0.18);
+            color: var(--success);
+        }
+
+        .badge-rule {
+            background: rgba(244, 63, 94, 0.18);
+            color: #be123c;
+        }
+
+        .table-wrap {
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: rgba(15, 23, 42, 0.05);
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .steps-list {
+            background: rgba(15, 23, 42, 0.04);
+            border-radius: 14px;
+            padding: 18px 20px;
+            max-height: 320px;
+            overflow: auto;
+            line-height: 1.55;
+        }
+
+                .graph-viewer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .graph-actions {
+            display: flex;
+            gap: 12px;
+            font-size: 0.85rem;
+        }
+
+        .graph-actions a {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .graph-actions a:hover {
+            text-decoration: underline;
+        }
+
+.graph-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .graph-card {
+            background: rgba(15, 23, 42, 0.04);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .graph-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: #fff;
+        }
+
+        .graph-card figcaption {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .graph-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--muted);
+            border: 1px dashed rgba(148, 163, 184, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: rgba(15, 23, 42, 0.5);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 1023px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "input"
+                    "result"
+                    "graphs";
+                margin-top: -20px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .panel {
+                padding: 22px;
+            }
+            .panel-actions {
+                flex-direction: column;
+            }
+            .btn-run,
+            .btn-clear {
+                width: 100%;
+            }
+            .hero-actions {
+                flex-direction: column;
+            }
+            .hero-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <header class="hero">
+            <div class="hero-inner">
+                <div>
+                    <h1>Inference Lab</h1>
+                    <p>Thử nghiệm suy diễn tiến và suy diễn lùi trên cùng một cơ sở tri thức. Quản lý luật, sự kiện,
+                        lựa chọn chiến lược THOA (stack/queue), chỉ số min/max và quan sát đồ thị FPG/RPG sinh tự động.
+                    </p>
+                </div>
+                <div class="hero-actions">
+                    <button type="button" class="btn btn-primary" id="btnSample">Tải dữ liệu tam giác mẫu</button>
+                    <a class="btn btn-secondary" href="https://graphviz.org/download/" target="_blank"
+                        rel="noopener">Cài Graphviz để xuất đồ thị</a>
+                </div>
+            </div>
+        </header>
+        <main class="workspace">
+            <section class="panel panel-input">
+                <div class="field-block">
+                    <div class="field-header">
+                        <h2>Luật suy diễn</h2>
+                        <div class="field-actions">
+                            <button type="button" class="btn-ghost" id="btnAddRule">Thêm luật mới</button>
+                            <button type="button" class="btn-ghost" id="btnClearRules">Xóa hết luật</button>
+                        </div>
+                    </div>
+                    <p>Nhập từng luật dạng <code>a ^ b -> c</code>. Bạn có thể dùng <code>?</code>, <code>&amp;</code>,
+                        dấu phẩy hoặc <code>and</code> để liên kết điều kiện.</p>
+                    <div id="ruleList" class="rule-list" aria-label="Danh sách luật"></div>
+                </div>
+                <div class="panel-divider"></div>
+                <div class="field-block">
+                    <label for="factsInput">
+                        <h3>Giả thiết (GT)</h3>
+                        <p>Nhập danh sách sự kiện ban đầu, phân tách bằng dấu phẩy.</p>
+                        <input id="factsInput" class="textfield" placeholder="a,b,c" autocomplete="off" />
+                    </label>
+                </div>
+                <div class="field-block">
+                    <label for="goalsInput">
+                        <h3>Mục tiêu (KL)</h3>
+                        <p>Nhập một hoặc nhiều kết luận cần chứng minh.</p>
+                        <input id="goalsInput" class="textfield" placeholder="r" autocomplete="off" />
+                    </label>
+                </div>
+                <div class="field-block options-block">
+                    <h3>Thiết lập suy diễn</h3>
+                    <div class="mode-switch" role="radiogroup" aria-label="Chọn chế độ suy diễn">
+                        <label><input type="radio" name="mode" value="forward" checked> Suy diễn tiến</label>
+                        <label><input type="radio" name="mode" value="backward"> Suy diễn lùi</label>
+                    </div>
+                    <div class="option-group" data-options="forward">
+                        <span>THOA:</span>
+                        <div class="option-buttons" role="radiogroup" aria-label="Chọn cấu trúc THOA">
+                            <label><input type="radio" name="structure" value="stack" checked> stack (LIFO)</label>
+                            <label><input type="radio" name="structure" value="queue"> queue (FIFO)</label>
+                        </div>
+                    </div>
+                    <div class="option-group option-index" data-options="forward">
+                        <span>Chỉ số ưu tiên luật (tiến)</span>
+                        <div class="option-buttons" role="radiogroup" aria-label="Chọn chỉ số ưu tiên luật">
+                            <label><input type="radio" name="forwardIndexMode" value="min" checked> min</label>
+                            <label><input type="radio" name="forwardIndexMode" value="max"> max</label>
+                        </div>
+                    </div>
+                    <div class="option-group option-index" data-options="backward" hidden>
+                        <span>Chỉ số ưu tiên mục tiêu (lùi)</span>
+                        <div class="option-buttons" role="radiogroup" aria-label="Chọn chỉ số ưu tiên mục tiêu">
+                            <label><input type="radio" name="backwardIndexMode" value="min" checked> min</label>
+                            <label><input type="radio" name="backwardIndexMode" value="max"> max</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-actions">
+                    <button type="button" class="btn btn-run" id="btnRun">Thực thi suy diễn</button>
+                    <button type="button" class="btn btn-clear" id="btnReset">Đặt lại</button>
+                </div>
+            </section>
+
+                        <section class="panel panel-result" id="resultPanel">
+                <div>
+                    <h2>Kết quả suy diễn</h2>
+                    <p>Theo dõi trạng thái thực thi và nhật ký hoạt động.</p>
+                </div>
+                <div id="statusBox" class="status status-info">Chưa thực thi. Nhập dữ liệu và nhấn <strong>Thực thi suy diễn</strong>.</div>
+                <div class="badge-row" id="summaryBadges"></div>
+                <div class="panel-divider"></div>
+                <div id="forwardResult" hidden>
+                    <h3>Nhật ký suy diễn tiến</h3>
+                    <div class="table-wrap">
+                        <table aria-label="Bảng nhật ký suy diễn tiến">
+                            <thead>
+                                <tr>
+                                    <th>Bước</th>
+                                    <th>Luật</th>
+                                    <th>THOA</th>
+                                    <th>TG</th>
+                                    <th>R còn</th>
+                                    <th>VET</th>
+                                    <th>Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTable">
+                                <tr>
+                                    <td colspan="7" style="text-align:center; padding:18px;">Chưa có dữ liệu.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="backwardResult" hidden>
+                    <h3>Nhật ký suy diễn lùi</h3>
+                    <div class="steps-list" id="stepsList">Chưa có dữ liệu.</div>
+                </div>
+            </section>
+
+            <section class="panel panel-graphs" id="graphPanel">
+                <div>
+                    <h2>Đồ thị suy diễn</h2>
+                    <p>Quan sát quan hệ giữa luật và sự kiện. Mỗi lần chạy sinh tệp tại <code>static/generated</code>.</p>
+                </div>
+                {% if not graphviz_available %}
+                <div class="status status-warn">Graphviz chưa sẵn sàng. Cài đặt Graphviz để hệ thống tự động xuất ảnh FPG/RPG.</div>
+                {% endif %}
+                <div class="graph-grid">
+                    <figure class="graph-card">
+                        <figcaption>Đồ thị FPG</figcaption>
+                        <div id="graphFpg" class="graph-placeholder">Chưa có dữ liệu.</div>
+                    </figure>
+                    <figure class="graph-card">
+                        <figcaption>Đồ thị RPG (chỉ áp dụng khi suy diễn tiến)</figcaption>
+                        <div id="graphRpg" class="graph-placeholder">Chưa có dữ liệu.</div>
+                    </figure>
+                </div>
+            </section>
+
+        </main>
+        <footer>
+            &copy; {{ current_year }} Inference Lab — Bộ thực hành suy diễn tiến &amp; lùi.
+        </footer>
+    </div>
+
+    <script>
+        const SAMPLE_DATA = {{ sample | safe }};
+        const GRAPHVIZ_AVAILABLE = {{ graphviz_available|tojson }};
+
+        const ruleListEl = document.getElementById('ruleList');
+        const factsInput = document.getElementById('factsInput');
+        const goalsInput = document.getElementById('goalsInput');
+        const statusBox = document.getElementById('statusBox');
+        const summaryBadges = document.getElementById('summaryBadges');
+        const historyTable = document.getElementById('historyTable');
+        const stepsList = document.getElementById('stepsList');
+        const forwardResult = document.getElementById('forwardResult');
+        const backwardResult = document.getElementById('backwardResult');
+        const graphFpg = document.getElementById('graphFpg');
+        const graphRpg = document.getElementById('graphRpg');
+        const runBtn = document.getElementById('btnRun');
+        const resetBtn = document.getElementById('btnReset');
+        const sampleBtn = document.getElementById('btnSample');
+        const addRuleBtn = document.getElementById('btnAddRule');
+        const clearRulesBtn = document.getElementById('btnClearRules');
+
+        let rulesState = [];
+
+        function handleRulePaste(event) {
+            const clipboard =
+                event.clipboardData?.getData('text') ||
+                window.clipboardData?.getData('text');
+            if (!clipboard) {
+                return;
+            }
+
+            const segments = clipboard
+                .split(/\r?\n|;/)
+                .map((segment) => segment.trim())
+                .filter((segment) => segment.length > 0);
+
+            const row = event.target.closest('.rule-item');
+            if (!row) {
+                return;
+            }
+            const index = Number(row.dataset.index || 0);
+
+            if (segments.length <= 1) {
+                // Single rule paste: allow default behaviour, but keep trimmed value in state.
+                setTimeout(() => {
+                    rulesState[index] = event.target.value.trim();
+                }, 0);
+                return;
+            }
+
+            event.preventDefault();
+            rulesState.splice(index, 1, segments[0]);
+            for (let i = 1; i < segments.length; i += 1) {
+                rulesState.splice(index + i, 0, segments[i]);
+            }
+            renderRuleList();
+        }
+
+        function createRuleRow(index, value) {
+            const row = document.createElement('div');
+            row.className = 'rule-item';
+            row.dataset.index = index;
+
+            const label = document.createElement('span');
+            label.className = 'rule-label';
+            label.textContent = `R${index + 1}`;
+
+            const input = document.createElement('input');
+            input.className = 'rule-input';
+            input.type = 'text';
+            input.value = value;
+            input.placeholder = "a ^ b -> c";
+            input.addEventListener('input', () => {
+                rulesState[index] = input.value.trim();
+            });
+            input.addEventListener('paste', handleRulePaste);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-icon';
+            removeBtn.title = 'Xóa luật này';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.addEventListener('click', () => {
+                removeRule(index);
+            });
+
+            row.appendChild(label);
+            row.appendChild(input);
+            row.appendChild(removeBtn);
+            return row;
+        }
+
+        function renderRuleList() {
+            ruleListEl.innerHTML = '';
+            if (!rulesState.length) {
+                const empty = document.createElement('div');
+                empty.className = 'graph-placeholder';
+                empty.textContent = 'Chưa có luật. Thêm luật mới hoặc tải dữ liệu mẫu.';
+                ruleListEl.appendChild(empty);
+                return;
+            }
+            rulesState.forEach((value, idx) => {
+                const row = createRuleRow(idx, value);
+                ruleListEl.appendChild(row);
+            });
+        }
+
+        function addRule(value = '') {
+            rulesState.push(value);
+            renderRuleList();
+        }
+
+        function removeRule(index) {
+            rulesState.splice(index, 1);
+            renderRuleList();
+        }
+
+        function loadSample() {
+            rulesState = [...SAMPLE_DATA.rules];
+            factsInput.value = SAMPLE_DATA.facts.join(', ');
+            goalsInput.value = SAMPLE_DATA.goals.join(', ');
+            document.querySelector('input[name="mode"][value="forward"]').checked = true;
+            document.querySelector('input[name="structure"][value="stack"]').checked = true;
+            document.querySelector('input[name="forwardIndexMode"][value="min"]').checked = true;
+            document.querySelector('input[name="backwardIndexMode"][value="min"]').checked = true;
+            updateOptionVisibility();
+            renderRuleList();
+            setStatus('Đã tải dữ liệu mẫu tam giác. Bạn có thể chỉnh sửa và chạy suy diễn.', 'info');
+            clearResults();
+        }
+
+        function clearResults() {
+            summaryBadges.innerHTML = '';
+            forwardResult.hidden = true;
+            backwardResult.hidden = true;
+            historyTable.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:18px;">Chưa có dữ liệu.</td></tr>`;
+            stepsList.textContent = 'Chưa có dữ liệu.';
+            renderGraph(null, graphFpg, 'Chưa có dữ liệu.');
+            renderGraph(null, graphRpg, 'Chưa có dữ liệu.');
+        }
+
+        function resetAll() {
+            rulesState = [''];
+            factsInput.value = '';
+            goalsInput.value = '';
+            document.querySelector('input[name="mode"][value="forward"]').checked = true;
+            document.querySelector('input[name="structure"][value="stack"]').checked = true;
+            document.querySelector('input[name="forwardIndexMode"][value="min"]').checked = true;
+            document.querySelector('input[name="backwardIndexMode"][value="min"]').checked = true;
+            updateOptionVisibility();
+            renderRuleList();
+            clearResults();
+            setStatus('Đã đặt lại dữ liệu. Nhập luật và giả thiết để bắt đầu.', 'info');
+        }
+
+        function setStatus(message, type = 'info') {
+            statusBox.textContent = message;
+            statusBox.className = `status status-${type}`;
+        }
+
+        function parseAtoms(text) {
+            if (!text) {
+                return [];
+            }
+            return text
+                .split(/\s*(?:,|&|\?|\^|and)\s*/i)
+                .map((token) => token.trim())
+                .filter(Boolean);
+        }
+
+        function gatherPayload() {
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const payload = {
+                mode,
+                rules: rulesState.filter((rule) => rule.trim().length > 0),
+                facts: parseAtoms(factsInput.value),
+                goals: parseAtoms(goalsInput.value),
+                options: {}
+            };
+
+            let indexMode;
+            if (mode === 'forward') {
+                payload.options.structure = document.querySelector('input[name="structure"]:checked').value;
+                indexMode = document.querySelector('input[name="forwardIndexMode"]:checked').value;
+            } else {
+                indexMode = document.querySelector('input[name="backwardIndexMode"]:checked').value;
+            }
+            payload.options.index_mode = indexMode;
+
+            return payload;
+        }
+
+        async function runInference() {
+            const payload = gatherPayload();
+
+            if (!payload.rules.length) {
+                setStatus('Vui lòng nhập ít nhất một luật.', 'warn');
+                return;
+            }
+            if (!payload.facts.length) {
+                setStatus('Vui lòng nhập tối thiểu một giả thiết (GT).', 'warn');
+                return;
+            }
+            if (!payload.goals.length) {
+                setStatus('Vui lòng nhập ít nhất một mục tiêu (KL).', 'warn');
+                return;
+            }
+
+            runBtn.disabled = true;
+            setStatus('Đang thực thi suy diễn, vui lòng đợi...', 'info');
+
+            try {
+                const response = await fetch('/api/infer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.ok) {
+                    throw new Error(data.error || 'Không thể thực thi suy diễn.');
+                }
+
+                displayResults(data);
+            } catch (error) {
+                setStatus(error.message || 'Đã xảy ra lỗi không xác định.', 'failure');
+                clearResults();
+            } finally {
+                runBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            const result = data.result;
+            const success = result.success;
+            setStatus(success ? 'Thành công! Đã đạt mục tiêu.' : 'Không đạt mục tiêu.', success ? 'success' : 'failure');
+
+            renderSummaryBadges(data.mode, result);
+
+            if (data.mode === 'forward') {
+                forwardResult.hidden = false;
+                backwardResult.hidden = true;
+                renderForwardHistory(result.history);
+                if (result.graphs) {
+                    renderGraph(result.graphs.fpg, graphFpg, GRAPHVIZ_AVAILABLE ? 'Đồ thị FPG' : 'Graphviz chưa sẵn sàng');
+                    renderGraph(result.graphs.rpg, graphRpg, GRAPHVIZ_AVAILABLE ? 'Đồ thị RPG' : 'Graphviz chưa sẵn sàng');
+                }
+            } else {
+                forwardResult.hidden = true;
+                backwardResult.hidden = false;
+                renderBackwardSteps(result.steps);
+                if (result.graphs) {
+                    renderGraph(result.graphs.fpg, graphFpg, GRAPHVIZ_AVAILABLE ? 'Đồ thị FPG' : 'Graphviz chưa sẵn sàng');
+                    renderGraph(null, graphRpg, 'Suy diễn lùi không sinh RPG.');
+                }
+            }
+        }
+
+        function renderSummaryBadges(mode, result) {
+            summaryBadges.innerHTML = '';
+            const badgeGroups = [];
+            const goals = result.goals || [];
+
+            if (goals.length) {
+                badgeGroups.push({
+                    title: 'Mục tiêu',
+                    className: 'badge-goal',
+                    items: goals
+                });
+            }
+
+            if (mode === 'forward') {
+                badgeGroups.push({
+                    title: 'Sự kiện cuối',
+                    className: 'badge-fact',
+                    items: result.finalFacts || []
+                });
+                badgeGroups.push({
+                    title: 'Luật đã bắn (VET)',
+                    className: 'badge-rule',
+                    items: (result.firedRules || []).map((r) => `R${r}`)
+                });
+            } else {
+                badgeGroups.push({
+                    title: 'Sự kiện biết cuối',
+                    className: 'badge-fact',
+                    items: result.finalKnown || []
+                });
+                badgeGroups.push({
+                    title: 'Luật sử dụng',
+                    className: 'badge-rule',
+                    items: (result.usedRules || []).map((r) => `R${r}`)
+                });
+            }
+
+            badgeGroups.forEach((group) => {
+                const fragment = document.createElement('div');
+                fragment.style.display = 'flex';
+                fragment.style.flexDirection = 'column';
+                fragment.style.gap = '6px';
+
+                const title = document.createElement('strong');
+                title.textContent = group.title;
+                title.style.fontSize = '0.9rem';
+                title.style.color = 'var(--muted)';
+                fragment.appendChild(title);
+
+                const row = document.createElement('div');
+                row.className = 'badge-row';
+                if (!group.items.length) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge';
+                    badge.textContent = '∅';
+                    row.appendChild(badge);
+                } else {
+                    group.items.forEach((item) => {
+                        const badge = document.createElement('span');
+                        badge.className = `badge ${group.className}`;
+                        badge.textContent = item;
+                        row.appendChild(badge);
+                    });
+                }
+                fragment.appendChild(row);
+                summaryBadges.appendChild(fragment);
+            });
+        }
+
+        function renderForwardHistory(history) {
+            if (!history || !history.length) {
+                historyTable.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:18px;">Không có nhật ký để hiển thị.</td></tr>`;
+                return;
+            }
+            historyTable.innerHTML = '';
+            history.forEach((trace) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${trace.step}</td>
+                    <td>${trace.rule ? `R${trace.rule}` : '-'}</td>
+                    <td>${formatRuleList(trace.thoa)}</td>
+                    <td>${formatAtomList(trace.known)}</td>
+                    <td>${formatRuleList(trace.remaining)}</td>
+                    <td>${formatRuleList(trace.fired)}</td>
+                    <td>${trace.note || ''}</td>
+                `;
+                historyTable.appendChild(row);
+            });
+        }
+
+        function renderBackwardSteps(steps) {
+            if (!steps || !steps.length) {
+                stepsList.textContent = 'Không có nhật ký để hiển thị.';
+                return;
+            }
+            const list = document.createElement('ol');
+            list.style.margin = '0';
+            list.style.paddingLeft = '18px';
+            steps.forEach((step) => {
+                const item = document.createElement('li');
+                item.textContent = step;
+                list.appendChild(item);
+            });
+            stepsList.innerHTML = '';
+            stepsList.appendChild(list);
+        }
+
+        function formatRuleList(rules) {
+            if (!rules || !rules.length) {
+                return '∅';
+            }
+            return rules.map((r) => (typeof r === 'number' ? `R${r}` : r)).join(', ');
+        }
+
+        function formatAtomList(atoms) {
+            if (!atoms || !atoms.length) {
+                return '∅';
+            }
+            return atoms.join(', ');
+        }
+
+        function renderGraph(src, container, placeholderText) {
+            container.innerHTML = '';
+            if (!src) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'graph-placeholder';
+                placeholder.textContent = placeholderText;
+                container.appendChild(placeholder);
+                return;
+            }
+            const img = document.createElement('img');
+            img.src = src + `?t=${Date.now()}`;
+            img.alt = placeholderText || 'Đồ thị suy diễn';
+            container.appendChild(img);
+        }
+
+        function updateOptionVisibility() {
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            document.querySelectorAll('[data-options]').forEach((el) => {
+                el.hidden = el.dataset.options !== mode;
+            });
+        }
+
+        document.querySelectorAll('input[name="mode"]').forEach((radio) => {
+            radio.addEventListener('change', updateOptionVisibility);
+        });
+
+        runBtn.addEventListener('click', runInference);
+        resetBtn.addEventListener('click', () => {
+            resetAll();
+        });
+        sampleBtn.addEventListener('click', () => {
+            loadSample();
+        });
+        addRuleBtn.addEventListener('click', () => addRule(''));
+        clearRulesBtn.addEventListener('click', () => {
+            rulesState = [];
+            renderRuleList();
+        });
+
+        // Initial setup
+        loadSample();
+    </script>
+</body>
+
+</html>
