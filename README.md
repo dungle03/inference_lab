@@ -12,7 +12,12 @@ Inference Lab là bộ công cụ phục vụ học tập và mô phỏng kỹ t
 - **Suy diễn lùi (Backward chaining)**:
   - Điều chỉnh chỉ số ưu tiên mục tiêu `min` hoặc `max`.
   - Sinh đồ thị FPG thể hiện quan hệ luật–sự kiện cuối cùng.
-- **Đồ thị trực quan**: sử dụng Graphviz kết hợp NetworkX, bố cục lại các tầng nút để giảm giao cắt, giúp dễ quan sát.
+- **Đồ thị SVG sắc nét**: xuất định dạng SVG để phóng to không bị mờ; bố cục trái→phải theo tầng, cạnh kiểu "ortho" kết hợp `concentrate=true` để giảm chồng chéo; tự động phân biệt màu giữa:
+  - GT (given): vòng tròn xanh dương.
+  - Fact suy ra (derived): xanh cyan nhạt.
+  - KL (goal): xanh lá.
+  - Rule: hình chữ nhật bo góc.
+- **Trải nghiệm xem tốt**: ảnh mặc định "vừa khung" ngay khi sinh ra (không cần cuộn ngang); có các nút điều khiển `Vừa khung / − / 100% / +` và hỗ trợ `Ctrl + Wheel`.
 - **Dọn dẹp tự động**: mọi ảnh đồ thị trong `inference_lab/web/static/generated/` sẽ được xoá khi tắt server web.
 
 ## Yêu cầu hệ thống
@@ -38,24 +43,7 @@ pip install networkx graphviz flask
 
 > Nếu đã cài Graphviz ở cấp hệ điều hành, đảm bảo biến `PATH` chứa thư mục có lệnh `dot` (`dot.exe` trên Windows).
 
-## Sử dụng CLI
-
-Chương trình dòng lệnh giúp bạn thử nghiệm nhanh trên terminal:
-
-```bash
-python -m inference_lab.cli
-# hoặc
-python inference_lab/cli.py
-```
-
-Tùy chọn chính trong menu CLI:
-
-- Nạp dữ liệu mẫu tam giác (16 luật) hoặc nhập luật mới.
-- Quản lý tập sự kiện (giả thiết ban đầu).
-- Chạy suy diễn tiến/lùi với các tham số đã chọn.
-- Xuất đồ thị FPG/RPG vào thư mục `inference_outputs/`.
-
-Khi chạy lần đầu, CLI tự động điền dữ liệu mẫu: giả thiết `{a, b, c}` và mục tiêu `{r}`.
+<!-- CLI has been removed; project is web-only. -->
 
 ## Giao diện web
 
@@ -69,17 +57,18 @@ python -m inference_lab.web.app
 
 Máy chủ mặc định lắng nghe tại `http://127.0.0.1:5000/`. Bạn có thể tinh chỉnh thông qua biến môi trường:
 
-| Biến | Ý nghĩa | Giá trị mặc định |
-| --- | --- | --- |
-| `FLASK_RUN_HOST` | Địa chỉ bind | `127.0.0.1` |
-| `FLASK_RUN_PORT` | Cổng lắng nghe | `5000` |
-| `FLASK_DEBUG` | Bật chế độ debug | `0` |
-| `GRAPH_MAX_HISTORY` | Số phiên đồ thị giữ lại khi server đang chạy | `12` |
+| Biến                | Ý nghĩa                                      | Giá trị mặc định |
+| ------------------- | -------------------------------------------- | ---------------- |
+| `FLASK_RUN_HOST`    | Địa chỉ bind                                 | `127.0.0.1`      |
+| `FLASK_RUN_PORT`    | Cổng lắng nghe                               | `5000`           |
+| `FLASK_DEBUG`       | Bật chế độ debug                             | `0`              |
+| `GRAPH_MAX_HISTORY` | Số phiên đồ thị giữ lại khi server đang chạy | `12`             |
 
 ### Tính năng giao diện web
-- Form nhập luật mới cho phép **dán nhiều luật cùng lúc** (tách theo xuống dòng hoặc dấu `;`).  
-- Chuyển đổi nhanh giữa suy diễn tiến và suy diễn lùi; giao diện sẽ hiển thị đúng nhóm tùy chọn tương ứng (THOA cho tiến, chỉ số mục tiêu cho lùi).  
-- Nhật ký suy diễn trực quan: bảng THOA cho forward và danh sách chứng minh cho backward.  
+
+- Form nhập luật mới cho phép **dán nhiều luật cùng lúc** (tách theo xuống dòng hoặc dấu `;`).
+- Chuyển đổi nhanh giữa suy diễn tiến và suy diễn lùi; giao diện sẽ hiển thị đúng nhóm tùy chọn tương ứng (THOA cho tiến, chỉ số mục tiêu cho lùi).
+- Nhật ký suy diễn trực quan: bảng THOA cho forward và danh sách chứng minh cho backward.
 - Ảnh FPG/RPG được sinh trong `inference_lab/web/static/generated/<session-id>/`, đồng thời được **dọn sạch khi server tắt**.
 
 ## Cấu trúc thư mục chính
@@ -87,7 +76,6 @@ Máy chủ mặc định lắng nghe tại `http://127.0.0.1:5000/`. Bạn có t
 ```
 inference_lab/
 ├── backward.py           # Thuật toán suy diễn lùi
-├── cli.py                # Giao diện dòng lệnh
 ├── forward.py            # Thuật toán suy diễn tiến
 ├── graphs.py             # Sinh đồ thị FPG/RPG bằng Graphviz
 ├── knowledge_base.py     # Quản lý luật và sự kiện
@@ -106,10 +94,10 @@ inference_lab/
 
 ## Đồ thị suy diễn
 
-- **FPG (Fact Propagation Graph)**: thể hiện quan hệ luật–sự kiện, tô màu khác nhau cho giả thiết, mục tiêu và sự kiện trung gian.
+- **FPG (Fact Propagation Graph)**: thể hiện quan hệ luật–sự kiện; GT/Derived/KL/Rule được tô màu như mục "Tính năng nổi bật".
 - **RPG (Rule Precedence Graph)**: chỉ khả dụng với suy diễn tiến.
-- Ảnh sinh ra được đặt tên theo `forward_fpg.png`, `forward_rpg.png`, `backward_fpg.png` trong từng thư mục phiên.
-- Khi Flask app dừng, toàn bộ thư mục con trong `static/generated/` được xoá (nhờ handler đăng ký bằng `atexit`).
+- Định dạng xuất: SVG. Tên file mặc định theo ngữ cảnh: `forward_fpg.svg`, `forward_rpg.svg`, `backward_fpg.svg`.
+- Web UI lưu file trong `inference_lab/web/static/generated/<session-id>/` và tự dọn khi tắt server.
 
 ## Kiến trúc suy diễn
 
@@ -123,7 +111,7 @@ inference_lab/
 ## Phát triển & đóng góp
 
 1. Tạo môi trường ảo và cài đặt phụ thuộc như đã hướng dẫn.
-2. Chạy CLI hoặc web sau khi chỉnh sửa để kiểm nghiệm.
+2. Chạy web sau khi chỉnh sửa để kiểm nghiệm.
 3. Nếu bạn bổ sung các luật mẫu khác, hãy cập nhật thêm trong `sample_data.py` hoặc cung cấp file riêng.
 4. Dự án chưa có bộ test tự động; khuyến khích bổ sung tuỳ nhu cầu.
 
