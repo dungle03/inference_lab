@@ -1,4 +1,4 @@
-"""Compatibility entry point for running the web interface."""
+cls"""Compatibility entry point for running the web interface."""
 
 from __future__ import annotations
 

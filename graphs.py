@@ -65,41 +65,40 @@ def build_rpg_graph(rules: Sequence[Rule]) -> nx.DiGraph:
     return graph
 
 
-def _apply_fact_style(
-    dot: "Digraph | None", node: str, role: str | None
-) -> None:
+def _apply_fact_style(dot: "Digraph | None", node: str, role: str | None) -> None:
     if dot is None:
         return
     base_attrs = {
         "shape": "circle",
-        "width": "0.65",
-        "height": "0.65",
+        "width": "0.8",
+        "height": "0.8",
+        "fixedsize": "true",
     }
     if role == "known":
         dot.node(
             node,
             node,
-            fillcolor="#e4f1ff",
-            color="#1f6fb2",
-            penwidth="1.2",
+            fillcolor="#dbeafe",
+            color="#1d4ed8",
+            penwidth="2.0",
             **base_attrs,
         )
     elif role == "goal":
         dot.node(
             node,
             node,
-            fillcolor="#e6f8ed",
-            color="#28924d",
-            penwidth="1.6",
+            fillcolor="#d1fae5",
+            color="#059669",
+            penwidth="2.5",
             **base_attrs,
         )
     else:
         dot.node(
             node,
             node,
-            fillcolor="#fff4c7",
-            color="#c5a200",
-            penwidth="1.1",
+            fillcolor="#fef3c7",
+            color="#d97706",
+            penwidth="1.8",
             **base_attrs,
         )
 
@@ -111,17 +110,18 @@ def _apply_rule_style(dot: "Digraph | None", node: str) -> None:
         node,
         node,
         shape="box",
-        width="0.95",
-        height="0.55",
-        fillcolor="#f3f3f3",
-        color="#7a7a7a",
-        penwidth="1.15",
-        margin="0.08,0.05",
+        width="1.0",
+        height="0.6",
+        fillcolor="#f1f5f9",
+        color="#64748b",
+        penwidth="1.8",
+        margin="0.12,0.08",
+        fixedsize="true",
     )
 
 
 def _group_nodes_by_rank(dot: "Digraph", graph: nx.DiGraph) -> None:
-    """Group nodes with similar distance into the same rank for clearer layout."""
+    """Group nodes into layers for cleaner left-to-right flow."""
 
     levels: Dict[str, int] = {}
     queue: deque[Tuple[str, int]] = deque()
@@ -137,11 +137,11 @@ def _group_nodes_by_rank(dot: "Digraph", graph: nx.DiGraph) -> None:
     while queue:
         current, level = queue.popleft()
         for successor in graph.successors(current):
-            if successor not in levels:
-                levels[successor] = level + 1
-                queue.append((successor, level + 1))
+            next_level = level + 1
+            if successor not in levels or next_level > levels[successor]:
+                levels[successor] = next_level
+                queue.append((successor, next_level))
 
-    # Ensure every node has a level
     for node in graph.nodes:
         levels.setdefault(node, 0)
 
@@ -153,6 +153,7 @@ def _group_nodes_by_rank(dot: "Digraph", graph: nx.DiGraph) -> None:
         nodes = groups[level]
         if len(nodes) <= 1:
             continue
+        nodes.sort(key=lambda n: (graph.nodes[n].get("type") != FACT_NODE, n))
         with dot.subgraph(name=f"rank_{level}") as same_rank:
             same_rank.attr(rank="same")
             for node in nodes:
@@ -164,24 +165,31 @@ def render_graph(
     filename: Path,
     *,
     rankdir: str = "LR",
+    ratio: str = "auto",
+    size: str | None = None,
+    dpi: int = 160,
 ) -> Optional[Path]:
     if not GRAPHVIZ_AVAILABLE:  # pragma: no cover
         return None
 
     dot = Digraph(comment="Inference graph")
     dot.attr(rankdir=rankdir)
+    dot.attr(ratio=ratio)
+    if size:
+        dot.attr(size=size)
     dot.graph_attr.update(
-        pad="0.45",
+        pad="0.5",
         bgcolor="#ffffff",
-        splines="spline",
-        ranksep="1.3",
-        nodesep="1.05",
+        splines="polyline",
+        ranksep="1.5",
+        nodesep="1.2",
         fontname="Arial",
-        fontsize="13",
+        fontsize="14",
         labelloc="t",
         overlap="false",
         outputorder="edgesfirst",
     )
+    dot.graph_attr.update(dpi=str(dpi))
     dot.node_attr.update(
         fontname="Arial",
         fontsize="12",
@@ -189,11 +197,11 @@ def render_graph(
         penwidth="1.2",
     )
     dot.edge_attr.update(
-        arrowhead="normal",
-        arrowsize="0.8",
+        arrowhead="vee",
+        arrowsize="0.9",
         color="#555555",
-        penwidth="1.05",
-        minlen="2",
+        penwidth="1.3",
+        minlen="1",
     )
 
     for node in graph.nodes:
@@ -224,7 +232,14 @@ def render_fpg(
     output: Path,
 ) -> Optional[Path]:
     graph = build_fpg_graph(rules, known_facts=known_facts, goal_facts=goal_facts)
-    return render_graph(graph, output, rankdir="LR")
+    return render_graph(
+        graph,
+        output,
+        rankdir="LR",
+        ratio="auto",
+        size=None,
+        dpi=220,
+    )
 
 
 def render_rpg(
@@ -233,4 +248,11 @@ def render_rpg(
     output: Path,
 ) -> Optional[Path]:
     graph = build_rpg_graph(rules)
-    return render_graph(graph, output, rankdir="TB")
+    return render_graph(
+        graph,
+        output,
+        rankdir="LR",
+        ratio="auto",
+        size=None,
+        dpi=220,
+    )

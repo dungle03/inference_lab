@@ -8,7 +8,15 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 from uuid import uuid4
 
-from flask import Blueprint, Flask, current_app, jsonify, render_template, request, url_for
+from flask import (
+    Blueprint,
+    Flask,
+    current_app,
+    jsonify,
+    render_template,
+    request,
+    url_for,
+)
 
 from inference_lab.backward import run_backward_inference
 from inference_lab.forward import run_forward_inference
@@ -35,7 +43,7 @@ def register_routes(app: Flask) -> None:
         }
         return render_template(
             "index.html",
-            sample=json.dumps(sample_payload, ensure_ascii=False),
+            sample=sample_payload,
             graphviz_available=GRAPHVIZ_AVAILABLE,
             current_year=datetime.now().year,
         )
@@ -157,7 +165,9 @@ def _handle_backward(request_data: Dict[str, Any], output_dir: Path) -> Dict[str
     return _serialize_backward_result(result, output_dir)
 
 
-def _serialize_forward_result(result: ForwardResult, output_dir: Path) -> Dict[str, Any]:
+def _serialize_forward_result(
+    result: ForwardResult, output_dir: Path
+) -> Dict[str, Any]:
     return {
         "success": result.success,
         "goals": result.goals,
