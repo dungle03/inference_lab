@@ -35,13 +35,21 @@ source .venv/bin/activate            # macOS / Linux
 pip install --upgrade pip
 ```
 
-## Cài đặt và cài đặt phụ thuộc
+## Cài đặt phụ thuộc & PATH
+
+1. Cài package Python:
 
 ```bash
-pip install networkx graphviz flask
+pip install -r inference_lab/requirements.txt
 ```
 
-> Nếu đã cài Graphviz ở cấp hệ điều hành, đảm bảo biến `PATH` chứa thư mục có lệnh `dot` (`dot.exe` trên Windows).
+2. Cài ứng dụng Graphviz (bắt buộc để xuất FPG/RPG):
+
+- Windows: tải installer từ `https://graphviz.org/download/` và cài đặt.
+- macOS (Homebrew): `brew install graphviz`
+- Ubuntu/Debian: `sudo apt-get install graphviz`
+
+Sau khi cài, đảm bảo biến môi trường `PATH` chứa thư mục có lệnh `dot` (Windows: `dot.exe`).
 
 <!-- CLI has been removed; project is web-only. -->
 
