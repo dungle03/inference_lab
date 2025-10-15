@@ -24,12 +24,16 @@ def parse_rule_text(raw: str) -> tuple[List[str], str]:
     text = raw.strip()
     if not text:
         raise ValueError("Rule text is empty.")
-    if "->" in text:
-        left, right = text.split("->", 1)
+    # Normalize common arrow variants and strip control chars
+    cleaned = re.sub(r"[\u0000-\u001F\u007F]", "", text)
+    normalized = cleaned.replace("=>", "->").replace("→", "->").replace(":>", "->")
+    if "->" in normalized:
+        left, right = normalized.split("->", 1)
     elif "" in text:
+        # Legacy separator from some editors/copy-paste
         left, right = text.split("", 1)
     else:
-        raise ValueError("Rule must contain '->' (example: a & b -> c).")
+        raise ValueError("Rule must contain an arrow like '->' (example: a & b -> c).")
     premises = split_atoms(left)
     conclusion = normalize_atom(right)
     if not premises:

@@ -278,12 +278,6 @@ def render_fpg(
         goal_facts=goal_facts,
         given_facts=given_facts,
     )
-    graph = build_fpg_graph(
-        rules,
-        known_facts=known_facts,
-        goal_facts=goal_facts,
-        given_facts=given_facts,
-    )
 
     highlight_nodes: Set[str] | None = None
     highlight_edges: Set[Tuple[str, str]] | None = None
