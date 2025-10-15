@@ -90,7 +90,9 @@ def run_backward_inference(
             if success:
                 known.add(goal)
                 used_rules.append(rule.id)
-                steps.append(f"{indent}  ✓ Mục tiêu '{goal}' được chứng minh nhờ R{rule.id}.")
+                steps.append(
+                    f"{indent}  ✓ Mục tiêu '{goal}' được chứng minh nhờ R{rule.id}."
+                )
                 visiting.remove(goal)
                 return True
 
@@ -114,9 +116,13 @@ def run_backward_inference(
     if make_graph:
         out_dir = Path(output_dir or "inference_outputs")
         out_dir.mkdir(parents=True, exist_ok=True)
-        fpg_path = out_dir / "backward_fpg.png"
+        fpg_path = out_dir / "backward_fpg.svg"
         rendered = graphs.render_fpg(
-            rules, known_facts=known, goal_facts=goal_list, output=fpg_path
+            rules,
+            known_facts=known,
+            goal_facts=goal_list,
+            output=fpg_path,
+            given_facts=set(kb.facts),
         )
         if rendered:
             graph_files["fpg"] = rendered

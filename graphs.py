@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import deque
 from pathlib import Path
-from typing import DefaultDict, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import DefaultDict, Dict, Iterable, List, Optional, Sequence, Tuple, Set
 
 import networkx as nx
 
@@ -26,11 +26,20 @@ def build_fpg_graph(
     rules: Sequence[Rule],
     known_facts: Iterable[str] = (),
     goal_facts: Iterable[str] = (),
+    *,
+    given_facts: Iterable[str] = (),
 ) -> nx.DiGraph:
     graph = nx.DiGraph()
-    for fact in known_facts:
-        graph.add_node(fact, type=FACT_NODE, role="known")
-    for fact in goal_facts:
+    known_set = set(known_facts)
+    given_set = set(given_facts)
+    goal_set = set(goal_facts)
+
+    # Distinguish given facts vs derived facts for clarity
+    for fact in given_set:
+        graph.add_node(fact, type=FACT_NODE, role="given")
+    for fact in known_set - given_set - goal_set:
+        graph.add_node(fact, type=FACT_NODE, role="derived")
+    for fact in goal_set:
         graph.add_node(fact, type=FACT_NODE, role="goal")
 
     for rule in rules:
@@ -65,22 +74,43 @@ def build_rpg_graph(rules: Sequence[Rule]) -> nx.DiGraph:
     return graph
 
 
-def _apply_fact_style(dot: "Digraph | None", node: str, role: str | None) -> None:
+def _apply_fact_style(
+    dot: "Digraph | None", node: str, role: str | None, *, muted: bool = False
+) -> None:
     if dot is None:
         return
     base_attrs = {
         "shape": "circle",
-        "width": "0.8",
-        "height": "0.8",
+        "width": "0.7",
+        "height": "0.7",
         "fixedsize": "true",
     }
-    if role == "known":
+    if muted:
+        dot.node(
+            node,
+            node,
+            fillcolor="#f8fafc",
+            color="#cbd5e1",
+            penwidth="1.0",
+            **base_attrs,
+        )
+        return
+    if role == "given":
         dot.node(
             node,
             node,
             fillcolor="#dbeafe",
             color="#1d4ed8",
             penwidth="2.0",
+            **base_attrs,
+        )
+    elif role == "derived":
+        dot.node(
+            node,
+            node,
+            fillcolor="#e0f2fe",
+            color="#0284c7",
+            penwidth="1.8",
             **base_attrs,
         )
     elif role == "goal":
@@ -103,7 +133,7 @@ def _apply_fact_style(dot: "Digraph | None", node: str, role: str | None) -> Non
         )
 
 
-def _apply_rule_style(dot: "Digraph | None", node: str) -> None:
+def _apply_rule_style(dot: "Digraph | None", node: str, *, muted: bool = False) -> None:
     if dot is None:
         return
     dot.node(
@@ -112,9 +142,9 @@ def _apply_rule_style(dot: "Digraph | None", node: str) -> None:
         shape="box",
         width="1.0",
         height="0.6",
-        fillcolor="#f1f5f9",
-        color="#64748b",
-        penwidth="1.8",
+        fillcolor="#f1f5f9" if not muted else "#f8fafc",
+        color="#64748b" if not muted else "#cbd5e1",
+        penwidth="1.8" if not muted else "1.0",
         margin="0.12,0.08",
         fixedsize="true",
     )
@@ -168,6 +198,8 @@ def render_graph(
     ratio: str = "auto",
     size: str | None = None,
     dpi: int = 160,
+    highlight_nodes: Optional[Set[str]] = None,
+    highlight_edges: Optional[Set[Tuple[str, str]]] = None,
 ) -> Optional[Path]:
     if not GRAPHVIZ_AVAILABLE:  # pragma: no cover
         return None
@@ -178,11 +210,12 @@ def render_graph(
     if size:
         dot.attr(size=size)
     dot.graph_attr.update(
-        pad="0.5",
+        pad="0.4",
         bgcolor="#ffffff",
-        splines="polyline",
-        ranksep="1.5",
-        nodesep="1.2",
+        splines="ortho",
+        concentrate="true",
+        ranksep="1.0",
+        nodesep="0.6",
         fontname="Arial",
         fontsize="14",
         labelloc="t",
@@ -193,27 +226,32 @@ def render_graph(
     dot.node_attr.update(
         fontname="Arial",
         fontsize="12",
-        style="filled",
+        style="filled,rounded",
         penwidth="1.2",
     )
     dot.edge_attr.update(
         arrowhead="vee",
-        arrowsize="0.9",
-        color="#555555",
-        penwidth="1.3",
+        arrowsize="0.7",
+        color="#94a3b8",
+        penwidth="1.1",
         minlen="1",
     )
 
     for node in graph.nodes:
         node_type = graph.nodes[node].get("type")
+        is_muted = bool(highlight_nodes) and node not in (highlight_nodes or set())
         if node_type == FACT_NODE:
             role = graph.nodes[node].get("role")
-            _apply_fact_style(dot, node, role)
+            _apply_fact_style(dot, node, role, muted=is_muted)
         else:
-            _apply_rule_style(dot, node)
+            _apply_rule_style(dot, node, muted=is_muted)
 
+    hl_edges = highlight_edges or set()
     for source, target in graph.edges:
-        dot.edge(source, target)
+        if highlight_edges is not None and (source, target) not in hl_edges:
+            dot.edge(source, target, color="#cbd5e1", arrowsize="0.6", penwidth="0.9")
+        else:
+            dot.edge(source, target)
 
     _group_nodes_by_rank(dot, graph)
 
@@ -230,8 +268,44 @@ def render_fpg(
     known_facts: Iterable[str] = (),
     goal_facts: Iterable[str] = (),
     output: Path,
+    given_facts: Iterable[str] = (),
+    highlight_rules: Optional[Iterable[int]] = None,
+    used_only: bool = False,
 ) -> Optional[Path]:
-    graph = build_fpg_graph(rules, known_facts=known_facts, goal_facts=goal_facts)
+    graph = build_fpg_graph(
+        rules,
+        known_facts=known_facts,
+        goal_facts=goal_facts,
+        given_facts=given_facts,
+    )
+    graph = build_fpg_graph(
+        rules,
+        known_facts=known_facts,
+        goal_facts=goal_facts,
+        given_facts=given_facts,
+    )
+
+    highlight_nodes: Set[str] | None = None
+    highlight_edges: Set[Tuple[str, str]] | None = None
+    if highlight_rules is not None:
+        highlight_nodes = set()
+        highlight_edges = set()
+        rule_ids = {int(r) for r in highlight_rules}
+        for rule in rules:
+            if rule.id in rule_ids:
+                rn = f"R{rule.id}"
+                highlight_nodes.add(rn)
+                for p in rule.premises:
+                    highlight_nodes.add(p)
+                    highlight_edges.add((p, rn))
+                highlight_nodes.add(rule.conclusion)
+                highlight_edges.add((rn, rule.conclusion))
+
+    if used_only and highlight_nodes is not None:
+        # Filter graph to highlighted subgraph only
+        keep_nodes = set(highlight_nodes)
+        graph = graph.subgraph(keep_nodes).copy()
+
     return render_graph(
         graph,
         output,
@@ -239,6 +313,8 @@ def render_fpg(
         ratio="auto",
         size=None,
         dpi=220,
+        highlight_nodes=highlight_nodes,
+        highlight_edges=highlight_edges,
     )
 
 

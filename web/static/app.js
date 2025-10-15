@@ -518,7 +518,7 @@
         img.draggable = false;
         img.style.display = "block";
         img.style.margin = "0";
-        img.style.padding = "24px"; // inner breathing room
+        // no extra padding to maximize visible area
         container.appendChild(img);
         frame.appendChild(container);
         card.appendChild(frame);
@@ -563,11 +563,19 @@
                 scale = 1;
             } else {
                 const rect = frame.getBoundingClientRect();
-                const availWidth = rect.width - 48; // img padding 24px * 2
-                const availHeight = rect.height - 48;
+                const container = img.parentElement;
+                const csC = container ? getComputedStyle(container) : null;
+                const csI = getComputedStyle(img);
+                const padX = (csC ? (parseFloat(csC.paddingLeft) + parseFloat(csC.paddingRight)) : 0)
+                    + (parseFloat(csI.paddingLeft) + parseFloat(csI.paddingRight));
+                const padY = (csC ? (parseFloat(csC.paddingTop) + parseFloat(csC.paddingBottom)) : 0)
+                    + (parseFloat(csI.paddingTop) + parseFloat(csI.paddingBottom));
+                const availWidth = rect.width - (isFinite(padX) ? padX : 0);
+                const availHeight = rect.height - (isFinite(padY) ? padY : 0);
                 const scaleX = availWidth / baseWidth;
                 const scaleY = availHeight / baseHeight;
-                scale = Math.min(scaleX, scaleY, 1);
+                // Fit: allow scale nhỏ hơn minScale để luôn nhìn trọn vẹn
+                scale = Math.min(scaleX, scaleY);
             }
             applyScale();
         }
@@ -575,7 +583,15 @@
         img.addEventListener("load", () => {
             baseWidth = img.naturalWidth || img.width;
             baseHeight = img.naturalHeight || img.height;
-            setTimeout(() => fitToFrame(), 50);
+            // Fit once image sizes are known and frame is in layout
+            requestAnimationFrame(() => {
+                fitToFrame();
+            });
+        });
+
+        // Refit on window resize to keep full view without scrolling
+        window.addEventListener("resize", () => {
+            fitToFrame();
         });
 
         card.addEventListener("click", (e) => {

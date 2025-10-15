@@ -92,7 +92,9 @@ def run_forward_inference(
     rule_index: Dict[int, Rule] = {rule.id: rule for rule in rules}
     history: List[StepTrace] = []
 
-    _enqueue_candidates(thoa, remaining, known, rules, structure=structure, index_mode=selection)
+    _enqueue_candidates(
+        thoa, remaining, known, rules, structure=structure, index_mode=selection
+    )
     history.append(
         StepTrace(
             step=0,
@@ -140,21 +142,23 @@ def run_forward_inference(
                 thoa=list(thoa),
                 remaining_rules=sorted(remaining),
                 fired_rules=list(fired),
-            note="Không còn luật khả dụng",
+                note="Không còn luật khả dụng",
+            )
         )
-    )
 
     graph_files: Dict[str, Path] = {}
     if make_graphs:
         out_dir = Path(output_dir or "inference_outputs")
         out_dir.mkdir(parents=True, exist_ok=True)
-        fpg_path = out_dir / "forward_fpg.png"
-        rpg_path = out_dir / "forward_rpg.png"
+        fpg_path = out_dir / "forward_fpg.svg"
+        rpg_path = out_dir / "forward_rpg.svg"
+        # FPG đầy đủ, phân biệt GT (given) và fact suy ra
         fpg_rendered = graphs.render_fpg(
             rules,
             known_facts=known,
             goal_facts=goal_set,
             output=fpg_path,
+            given_facts=set(kb.facts),
         )
         rpg_rendered = graphs.render_rpg(rules, output=rpg_path)
         if fpg_rendered:

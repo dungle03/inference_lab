@@ -550,6 +550,55 @@
             gap: 16px;
         }
 
+        .graph-legend {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-swatch {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+        }
+
+        .legend-fact {
+            background: #fef3c7;
+            border-color: #d97706;
+        }
+
+        .legend-known {
+            background: #dbeafe;
+            border-color: #1d4ed8;
+        }
+
+        .legend-goal {
+            background: #d1fae5;
+            border-color: #059669;
+        }
+
+        .legend-rule {
+            width: 16px;
+            height: 12px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            border: 2px solid #64748b;
+        }
+
+        .legend-muted {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
         .graph-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -961,6 +1010,12 @@
                     FPG/RPG.</div>
                 {% endif %}
                 <div class="graph-viewer" id="graphViewer">
+                    <div class="graph-legend" aria-hidden="true">
+                        <span class="legend-item"><span class="legend-swatch legend-known"></span>GT</span>
+                        <span class="legend-item"><span class="legend-swatch legend-fact"></span>Fact suy ra</span>
+                        <span class="legend-item"><span class="legend-swatch legend-goal"></span>KL</span>
+                        <span class="legend-item"><span class="legend-rule"></span>Rule</span>
+                    </div>
                     <div class="graph-tabs" id="graphTabs" role="tablist" aria-label="Chọn đồ thị"></div>
                     <div class="graph-deck" id="graphDeck"></div>
                 </div>

@@ -3,3 +3,9 @@
 
 #png
 *.png
+
+# static/generated/
+static/generated/
+
+# svg   
+*.svg
