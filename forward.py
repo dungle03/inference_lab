@@ -152,7 +152,7 @@ def run_forward_inference(
         out_dir.mkdir(parents=True, exist_ok=True)
         fpg_path = out_dir / "forward_fpg.svg"
         rpg_path = out_dir / "forward_rpg.svg"
-        # FPG đầy đủ, phân biệt GT (given) và fact suy ra
+        # FPG chỉ hiển thị fact nodes, phân biệt GT (given) và fact suy ra
         fpg_rendered = graphs.render_fpg(
             rules,
             known_facts=known,

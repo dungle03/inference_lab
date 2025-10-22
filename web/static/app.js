@@ -197,6 +197,7 @@
 
     function gatherPayload() {
         const mode = document.querySelector('input[name="mode"]:checked').value;
+
         const payload = {
             mode,
             rules: rulesState.filter((rule) => rule.trim().length > 0),

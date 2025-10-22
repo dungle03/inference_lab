@@ -29,6 +29,18 @@ def build_fpg_graph(
     *,
     given_facts: Iterable[str] = (),
 ) -> nx.DiGraph:
+    """
+    Build Fact Propagation Graph with only fact nodes (no rule nodes).
+
+    Args:
+        rules: Sequence of inference rules
+        known_facts: Set of all known facts
+        goal_facts: Set of goal facts
+        given_facts: Set of initial given facts
+
+    Returns:
+        NetworkX directed graph with direct fact-to-fact edges
+    """
     graph = nx.DiGraph()
     known_set = set(known_facts)
     given_set = set(given_facts)
@@ -42,14 +54,15 @@ def build_fpg_graph(
     for fact in goal_set:
         graph.add_node(fact, type=FACT_NODE, role="goal")
 
+    # Always build graph with only fact nodes, directly connecting premises to conclusions
     for rule in rules:
-        rule_node = f"R{rule.id}"
-        graph.add_node(rule_node, type=RULE_NODE, rule_id=rule.id)
+        # Add conclusion node
         graph.add_node(rule.conclusion, type=FACT_NODE)
-        graph.add_edge(rule_node, rule.conclusion)
+        # Connect each premise directly to conclusion (no rule node)
         for premise in rule.premises:
             graph.add_node(premise, type=FACT_NODE)
-            graph.add_edge(premise, rule_node)
+            graph.add_edge(premise, rule.conclusion)
+
     return graph
 
 
@@ -272,6 +285,21 @@ def render_fpg(
     highlight_rules: Optional[Iterable[int]] = None,
     used_only: bool = False,
 ) -> Optional[Path]:
+    """
+    Render FPG graph to file (always shows only fact nodes).
+
+    Args:
+        rules: Sequence of inference rules
+        known_facts: Set of all known facts
+        goal_facts: Set of goal facts
+        output: Output file path
+        given_facts: Set of initial given facts
+        highlight_rules: Optional list of rule IDs to highlight (not used in facts-only mode)
+        used_only: If True, only show highlighted subgraph
+
+    Returns:
+        Path to rendered file or None if graphviz unavailable
+    """
     graph = build_fpg_graph(
         rules,
         known_facts=known_facts,
@@ -279,21 +307,9 @@ def render_fpg(
         given_facts=given_facts,
     )
 
+    # Note: highlight_rules is ignored since we no longer show rule nodes
     highlight_nodes: Set[str] | None = None
     highlight_edges: Set[Tuple[str, str]] | None = None
-    if highlight_rules is not None:
-        highlight_nodes = set()
-        highlight_edges = set()
-        rule_ids = {int(r) for r in highlight_rules}
-        for rule in rules:
-            if rule.id in rule_ids:
-                rn = f"R{rule.id}"
-                highlight_nodes.add(rn)
-                for p in rule.premises:
-                    highlight_nodes.add(p)
-                    highlight_edges.add((p, rn))
-                highlight_nodes.add(rule.conclusion)
-                highlight_edges.add((rn, rule.conclusion))
 
     if used_only and highlight_nodes is not None:
         # Filter graph to highlighted subgraph only
