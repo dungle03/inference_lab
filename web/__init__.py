@@ -5,9 +5,9 @@ from __future__ import annotations
 import atexit
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, redirect, render_template
 
-from .routes import register_routes
+from .routes import lab_bp, medical_bp
 
 
 def _remove_tree(path: Path) -> None:
@@ -70,7 +70,15 @@ def create_app() -> Flask:
     app.config["GRAPH_OUTPUT_ROOT"] = graph_root
     app.config.setdefault("GRAPH_MAX_HISTORY", 12)
 
-    register_routes(app)
+    # Register blueprints
+    app.register_blueprint(lab_bp)
+    app.register_blueprint(medical_bp)
+
+    # Root route - show home page with options
+    @app.route("/")
+    def index():
+        return render_template("home.html", current_year=2025)
+
     _register_shutdown_cleanup(graph_root)
     return app
 

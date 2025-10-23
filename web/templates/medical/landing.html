@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Hỗ trợ Chẩn đoán Y tế - AI Medical Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-20 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 float-animation">🏥 AI Medical Assistant</h1>
+            <p class="text-xl md:text-2xl mb-6 opacity-95">Hỗ trợ Chẩn đoán thông minh với công nghệ AI</p>
+            <p class="max-w-2xl mx-auto mb-8 text-lg opacity-90 leading-relaxed">
+                Hệ thống sử dụng Trí tuệ nhân tạo với <strong>{{ metadata.total_rules }} luật y tế</strong> để phân tích
+                triệu chứng và đưa ra khuyến nghị sơ bộ
+            </p>
+            <a href="{{ url_for('medical.check') }}"
+                class="inline-block px-8 py-4 bg-white text-purple-600 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
+                🚀 Bắt đầu Kiểm tra
+            </a>
+
+            <div class="mt-10 max-w-2xl mx-auto glass-effect rounded-xl p-6">
+                <p class="text-sm md:text-base opacity-95">
+                    ⚠️ <strong>Lưu ý:</strong> Hệ thống chỉ mang tính tham khảo. Khi có triệu chứng nghiêm trọng, hãy
+                    đến cơ sở y tế hoặc gọi cấp cứu <strong>115</strong>.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 px-4 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Lĩnh vực Hỗ trợ</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div
+                    class="bg-white border-2 border-gray-100 rounded-xl p-6 hover:shadow-lg transition-all hover:border-indigo-200">
+                    <div class="text-5xl mb-4">🫁</div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">Hô hấp</h3>
+                    <p class="text-gray-600 mb-4 text-sm">Cảm cúm, COVID-19, Viêm phổi, Hen suyễn</p>
+                    <span
+                        class="inline-block px-4 py-2 bg-indigo-50 text-indigo-700 rounded-full text-sm font-semibold">25
+                        luật</span>
+                </div>
+
+                <div
+                    class="bg-white border-2 border-gray-100 rounded-xl p-6 hover:shadow-lg transition-all hover:border-green-200">
+                    <div class="text-5xl mb-4">💊</div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">Tiêu hóa</h3>
+                    <p class="text-gray-600 mb-4 text-sm">Viêm dạ dày, Tiêu chảy, Ngộ độc thực phẩm</p>
+                    <span
+                        class="inline-block px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-semibold">20
+                        luật</span>
+                </div>
+
+                <div
+                    class="bg-white border-2 border-gray-100 rounded-xl p-6 hover:shadow-lg transition-all hover:border-red-200">
+                    <div class="text-5xl mb-4">❤️</div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">Tim mạch</h3>
+                    <p class="text-gray-600 mb-4 text-sm">Tăng huyết áp, Đau thắt ngực, Rối loạn nhịp</p>
+                    <span class="inline-block px-4 py-2 bg-red-50 text-red-700 rounded-full text-sm font-semibold">15
+                        luật</span>
+                </div>
+
+                <div
+                    class="bg-white border-2 border-gray-100 rounded-xl p-6 hover:shadow-lg transition-all hover:border-amber-200">
+                    <div class="text-5xl mb-4">🚑</div>
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">Cấp cứu</h3>
+                    <p class="text-gray-600 mb-4 text-sm">Ngất, Chấn thương, Sốc phản vệ</p>
+                    <span
+                        class="inline-block px-4 py-2 bg-amber-50 text-amber-700 rounded-full text-sm font-semibold">10
+                        luật</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 px-4 bg-gray-50">
+        <div class="max-w-4xl mx-auto">
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+                    <div class="text-4xl font-bold text-purple-600 mb-2">{{ metadata.total_rules }}</div>
+                    <div class="text-gray-600 font-medium">Luật Y tế</div>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+                    <div class="text-4xl font-bold text-purple-600 mb-2">⭐ 4.5</div>
+                    <div class="text-gray-600 font-medium">Đánh giá</div>
+                </div>
+                <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+                    <div class="text-4xl font-bold text-purple-600 mb-2">~5 min</div>
+                    <div class="text-gray-600 font-medium">Thời gian</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 px-4">
+        <div class="max-w-4xl mx-auto text-center text-sm text-gray-600">
+            <p>
+                <a href="{{ url_for('lab.index') }}" class="text-purple-600 hover:text-purple-700">🧪 Developer Lab</a>
+                |
+                <a href="https://github.com/dungle03/inference_lab" target="_blank"
+                    class="text-purple-600 hover:text-purple-700">📦 GitHub</a> |
+                <span>© {{ current_year }} Inference Lab</span>
+            </p>
+        </div>
+    </footer>
+</body>
+
+</html>

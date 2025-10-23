@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lỗi - Medical AI</title>
+    <link rel="stylesheet" href="/static/medical/medical.css">
+</head>
+
+<body>
+    <div class="results-container">
+        <header class="results-header">
+            <a href="{{ url_for('medical.landing') }}" class="back-link">← Trang chủ</a>
+            <h1>⚠️ Có lỗi xảy ra</h1>
+        </header>
+
+        <main class="results-main">
+            <div class="error-card">
+                <div class="error-icon">❌</div>
+                <h2>Không thể hoàn tất yêu cầu</h2>
+                <p style="color: var(--text-muted); margin: 20px 0;">{{ error if error else "Đã xảy ra lỗi không xác
+                    định. Vui lòng thử lại." }}</p>
+                <div style="display: flex; gap: 16px; justify-content: center; margin-top: 32px;">
+                    <a href="{{ url_for('medical.check') }}" class="btn btn-primary">🔄 Thử lại</a>
+                    <a href="{{ url_for('medical.landing') }}" class="btn btn-secondary">← Về trang chủ</a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="results-footer">
+            <p>Medical AI © {{ current_year }} | <a href="{{ url_for('lab.index') }}">Lab Mode</a></p>
+        </footer>
+    </div>
+</body>
+
+</html>

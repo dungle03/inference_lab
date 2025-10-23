@@ -67,7 +67,7 @@ def run_forward_inference(
     index_mode: str = "min",
     initial_facts: Optional[Iterable[str]] = None,
     output_dir: Optional[Path] = None,
-    make_graphs: bool = True,
+    make_graphs: bool = False,
 ) -> ForwardResult:
     structure = ensure_choice(strategy, FORWARD_STRUCTURES, label="strategy")
     selection = ensure_choice(index_mode, FORWARD_INDEX_MODES, label="index_mode")

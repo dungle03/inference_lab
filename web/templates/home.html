@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inference Lab - Hệ thống Suy diễn Thông minh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-gray-900 mb-4">
+                🧠 Inference Lab
+            </h1>
+            <p class="text-xl text-gray-600">
+                Hệ thống Suy diễn Thông minh - Forward & Backward Chaining
+            </p>
+        </div>
+
+        <!-- Main Options Grid -->
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <!-- Inference Lab -->
+            <a href="/lab"
+                class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-blue-400 transform hover:scale-105">
+                <div class="p-8">
+                    <div class="text-6xl mb-4 text-center">🔬</div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-3 text-center">Inference Lab</h2>
+                    <p class="text-gray-600 text-center mb-6">
+                        Thí nghiệm với các luật suy diễn và tính toán logic
+                    </p>
+                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                Tạo luật suy diễn tùy chỉnh
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                Tam giác và công thức toán học
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                Suy diễn tiến & lùi
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                Trực quan hóa đồ thị
+                            </li>
+                        </ul>
+                    </div>
+                    <div
+                        class="text-center text-blue-600 font-semibold group-hover:text-blue-700 flex items-center justify-center">
+                        Truy cập ngay
+                        <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Medical Diagnosis -->
+            <a href="/medical"
+                class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-purple-400 transform hover:scale-105">
+                <div class="p-8">
+                    <div class="text-6xl mb-4 text-center">🏥</div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-3 text-center">Medical Diagnosis</h2>
+                    <p class="text-gray-600 text-center mb-6">
+                        Hệ thống chẩn đoán y tế thông minh sử dụng suy diễn tiến
+                    </p>
+                    <div class="bg-purple-50 rounded-lg p-4 mb-4">
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                Chẩn đoán bệnh từ triệu chứng
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                Suy diễn tiến (Forward Chaining)
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                Điểm tin cậy thông minh
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                Chẩn đoán phân biệt
+                            </li>
+                        </ul>
+                    </div>
+                    <div
+                        class="text-center text-purple-600 font-semibold group-hover:text-purple-700 flex items-center justify-center">
+                        Truy cập ngay
+                        <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Features Section -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+                ✨ Tính năng nổi bật
+            </h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-4xl mb-3">🚀</div>
+                    <h4 class="font-bold text-gray-800 mb-2">Hiệu suất cao</h4>
+                    <p class="text-sm text-gray-600">Thuật toán tối ưu với độ chính xác cao</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-3">📊</div>
+                    <h4 class="font-bold text-gray-800 mb-2">Trực quan hóa</h4>
+                    <p class="text-sm text-gray-600">Biểu đồ và đồ thị dễ hiểu</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl mb-3">🎯</div>
+                    <h4 class="font-bold text-gray-800 mb-2">Dễ sử dụng</h4>
+                    <p class="text-sm text-gray-600">Giao diện thân thiện, trực quan</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-600 text-sm">
+            <p>Inference Lab © {{ current_year }} • Hệ thống Suy diễn Thông minh</p>
+            <p class="mt-2">Forward Chaining • Backward Chaining • Medical AI</p>
+        </div>
+    </div>
+</body>
+
+</html>

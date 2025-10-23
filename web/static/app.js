@@ -238,7 +238,7 @@
         setStatus("Đang thực thi suy diễn, vui lòng đợi...", "info");
 
         try {
-            const response = await fetch("/api/infer", {
+            const response = await fetch("/lab/api/infer", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

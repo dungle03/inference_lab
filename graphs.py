@@ -238,9 +238,12 @@ def render_graph(
     dot.graph_attr.update(dpi=str(dpi))
     dot.node_attr.update(
         fontname="Arial",
-        fontsize="12",
+        fontsize="11",
         style="filled,rounded",
         penwidth="1.2",
+        width="1.5",
+        height="0.6",
+        fixedsize="false",
     )
     dot.edge_attr.update(
         arrowhead="vee",
@@ -294,27 +297,52 @@ def render_fpg(
         goal_facts: Set of goal facts
         output: Output file path
         given_facts: Set of initial given facts
-        highlight_rules: Optional list of rule IDs to highlight (not used in facts-only mode)
-        used_only: If True, only show highlighted subgraph
+        highlight_rules: Optional list of rule IDs to highlight (chỉ hiển thị rules này nếu used_only=True)
+        used_only: If True, only show subgraph with fired rules
 
     Returns:
         Path to rendered file or None if graphviz unavailable
     """
+    # Nếu used_only=True, chỉ lấy rules đã được fire
+    filtered_rules = rules
+    if used_only and highlight_rules is not None:
+        fired_ids = set(highlight_rules)
+        filtered_rules = [r for r in rules if r.id in fired_ids]
+
     graph = build_fpg_graph(
-        rules,
+        filtered_rules,  # Chỉ dùng rules đã fire
         known_facts=known_facts,
         goal_facts=goal_facts,
         given_facts=given_facts,
     )
 
-    # Note: highlight_rules is ignored since we no longer show rule nodes
-    highlight_nodes: Set[str] | None = None
-    highlight_edges: Set[Tuple[str, str]] | None = None
+    # Nếu used_only, chỉ giữ lại nodes có trong đường đi từ given -> goals
+    if used_only:
+        # Tìm tất cả nodes trên đường đi từ given facts đến goal facts
+        given_set = set(given_facts)
+        goal_set = set(goal_facts)
+        keep_nodes = set()
 
-    if used_only and highlight_nodes is not None:
-        # Filter graph to highlighted subgraph only
-        keep_nodes = set(highlight_nodes)
-        graph = graph.subgraph(keep_nodes).copy()
+        # BFS từ given facts để tìm tất cả nodes có thể reach được
+        from collections import deque
+
+        queue = deque(given_set)
+        visited = set(given_set)
+
+        while queue:
+            node = queue.popleft()
+            keep_nodes.add(node)
+            for successor in graph.successors(node):
+                if successor not in visited:
+                    visited.add(successor)
+                    queue.append(successor)
+
+        # Chỉ giữ lại nodes trên đường đi và nodes là goal
+        keep_nodes.update(goal_set & visited)
+
+        # Filter graph
+        if keep_nodes:
+            graph = graph.subgraph(keep_nodes).copy()
 
     return render_graph(
         graph,
@@ -323,8 +351,6 @@ def render_fpg(
         ratio="auto",
         size=None,
         dpi=220,
-        highlight_nodes=highlight_nodes,
-        highlight_edges=highlight_edges,
     )
 
 
@@ -332,8 +358,16 @@ def render_rpg(
     rules: Sequence[Rule],
     *,
     output: Path,
+    highlight_rules: Optional[Iterable[int]] = None,
+    used_only: bool = False,
 ) -> Optional[Path]:
-    graph = build_rpg_graph(rules)
+    # Nếu used_only=True, chỉ lấy rules đã được fire
+    filtered_rules = rules
+    if used_only and highlight_rules is not None:
+        fired_ids = set(highlight_rules)
+        filtered_rules = [r for r in rules if r.id in fired_ids]
+
+    graph = build_rpg_graph(filtered_rules)
     return render_graph(
         graph,
         output,
